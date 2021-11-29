@@ -1,0 +1,71 @@
+**** PROPERTIES SKAFFOLDER ****
+{
+    "forEachObj": "db",
+    "overwrite": false,
+    "_partials": [
+        {
+            "template": "\n{{#each db._resources}}import {{capitalize name}}Model from \"../models/{{capitalize ../db.name}}/{{capitalize name}}Model\";\n{{/each}} ",
+            "tagFrom": "// Start Import Models",
+            "tagTo": "// End Import Models",
+            "name": "Partial Import"
+        },
+        {
+            "template": "\n{{#each db._resources}}\n\t\t{{capitalize name}}Model.init();\n{{/each}}\t\t\t",
+            "tagFrom": "// Start Init Models",
+            "tagTo": "// End Init Models",
+            "name": "Partial Init"
+        }
+    ]
+}
+**** END PROPERTIES SKAFFOLDER ****
+// Import Mongoose
+import mongoose from "mongoose";
+// Logging
+import Logger from "./Logger";
+// Properties
+import properties from "../properties.js";
+
+// Start Import Models
+// End Import Models
+
+class Database {
+  constructor() {}
+
+  /**
+   * Init database
+   */
+  async init() {
+    await this.authenticate();
+    Logger.info("MongoDB connected at: " + properties.{{db.name}}_dbUrl);
+
+    // Start Init Models
+    // End Init Models
+  }
+
+  /**
+   * Start database connection
+   */
+  async authenticate() {
+    Logger.info("Authenticating to the databases...");
+    try {
+      this.dbConnection_{{db.name}} = await mongoose.connect(
+        "mongodb://" + properties.{{db.name}}_dbUrl,
+        { useNewUrlParser: true }
+      );
+    } catch (err) {
+      Logger.error(`Failed connection to the DB: ${err.message}`);
+      Logger.error(err);
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      await this.authenticate();
+    }
+  }
+
+  /**
+   * Get connection db
+   */
+  getConnection() {
+    return this.dbConnection_{{db.name}};
+  }
+}
+
+export default new Database();
